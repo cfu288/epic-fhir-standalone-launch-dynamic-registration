@@ -15,7 +15,10 @@ export default function App() {
           Below is a video of the bug in action:
         </p>
         <video controls>
-          <source src="./bug.mp4" type="video/mp4" />
+          <source
+            src="https://user-images.githubusercontent.com/2985976/209190730-d38774e3-2f56-4756-9c75-2f044654bd40.mp4"
+            type="video/mp4"
+          />
         </video>
       </main>
     </div>
