@@ -1,5 +1,7 @@
 # Minimal example showing error with Epic FHIR Dynamic Registration
 
+[See a live demo of this repo](https://dreamy-frangollo-bf9d4c.netlify.app/)
+
 This is a "minimal" repo showing that an SPA calling the `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/register` does not seem to work. Please let me know if I'm missing something - I'd love to try and figure out what's wrong.
 
 I've attached a video of the bug in action below:
