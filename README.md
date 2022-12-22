@@ -3,7 +3,9 @@
 This is a "minimal" repo showing that an SPA calling the `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/register` does not seem to work. Please let me know if I'm missing something - I'd love to try and figure out what's wrong.
 
 I've attached a video of the bug in action below:
-![Bug](./bug.mp4)
+
+https://user-images.githubusercontent.com/2985976/209190730-d38774e3-2f56-4756-9c75-2f044654bd40.mp4
+
 
 To run locally, you need npm installed. Run the following commands
 
