@@ -12,6 +12,8 @@ npm i
 npm run dev
 ```
 
+If running locally, you may need to comment out the line `base: "/epic-fhir-standalone-launch-dynamic-registration/",` in `vite.config.js`.
+
 You'll need a `.env` with the following:
 
 ```
