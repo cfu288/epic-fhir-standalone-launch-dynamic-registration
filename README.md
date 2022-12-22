@@ -6,15 +6,12 @@ I've attached a video of the bug in action below:
 
 https://user-images.githubusercontent.com/2985976/209190730-d38774e3-2f56-4756-9c75-2f044654bd40.mp4
 
-
 To run locally, you need npm installed. Run the following commands
 
 ```
 npm i
 npm run dev
 ```
-
-If running locally, you may need to comment out the line `base: "/epic-fhir-standalone-launch-dynamic-registration/",` in `vite.config.js`.
 
 You'll need a `.env` with the following:
 
