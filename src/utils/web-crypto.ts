@@ -21,7 +21,7 @@ interface CryptoConfig {
 // Configuration for WebCrypto
 export const CryptoConfig: CryptoConfig = {
   name: "RSASSA-PKCS1-v1_5",
-  modulusLength: 4096,
+  modulusLength: 2048,
   publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
   hash: "SHA-384",
   extractable: false,

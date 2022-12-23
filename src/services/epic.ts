@@ -12,7 +12,7 @@ export function getDSTU2Url() {
 export function getLoginUrl(): string & Location {
   const params = {
     client_id: `${import.meta.env.VITE_EPIC_CLIENT_ID}`,
-    scope: "Patient.read Patient.search",
+    scope: "openid fhirUser",
     redirect_uri: `${import.meta.env.VITE_PUBLIC_URL}${AppRoutes.EpicCallback}`,
     aud: getDSTU2Url(),
     response_type: "code",
@@ -45,7 +45,7 @@ export async function fetchAccessTokenWithCode(
       code: code,
     }),
   });
-  if (res.status !== 200) {
+  if (!res.ok) {
     const text = await res.text();
     throw new Error(
       `Error getting access token: API returned a ${res.status} with data ${text}`
@@ -81,7 +81,7 @@ export async function registerDynamicClient(
     },
     body: JSON.stringify(request),
   });
-  if (registerRes.status !== 200) {
+  if (!registerRes.ok) {
     const text = await registerRes.text();
     throw new Error(
       `Error registering dynamic client: API returned a ${registerRes.status} with data ${text}`
@@ -112,7 +112,7 @@ export async function fetchAccessTokenUsingJWT(
       assertion: signedJwt,
     }),
   });
-  if (tokenRes.status !== 200) {
+  if (!tokenRes.ok) {
     const text = await tokenRes.text();
     throw new Error(`Error getting access token with JWT: ${text}`);
   }
