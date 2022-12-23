@@ -14,7 +14,8 @@ enum Status {
 }
 
 export default function EpicRedirect() {
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState("Hold on as we complete your login...");
+  const [isError, setIsError] = useState(false);
   const [status1, setStatus1] = useState<Status>(Status.Idle);
   const [status2, setStatus2] = useState<Status>(Status.Idle);
   const [status3, setStatus3] = useState<Status>(Status.Idle);
@@ -37,12 +38,15 @@ export default function EpicRedirect() {
         .then((res) => {
           setStatus3(Status.Success);
           console.log(res);
+          setMsg("Successfully logged in!");
         })
         .catch((e) => {
+          setIsError(true);
           setMsg(`${e.message}`);
         });
     } else {
       setStatus1(Status.Error);
+      setIsError(true);
       setMsg(
         "There was a problem trying to sign in: no code was provided in url"
       );
@@ -78,9 +82,7 @@ export default function EpicRedirect() {
               : "✅ Successfully fetched access token with JWT"}
           </li>
         </ol>
-        <p style={{ color: msg ? "red" : "" }}>
-          {!msg ? "Hold on as we complete your login" : msg}
-        </p>
+        <p style={{ color: isError ? "red" : "" }}>{msg}</p>
         <a href={AppRoutes.Home}>
           <button type="button">Back to main page</button>
         </a>

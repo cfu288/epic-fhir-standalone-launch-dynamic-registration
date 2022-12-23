@@ -1,5 +1,5 @@
 import {
-  IDBConfig,
+  IDBKeyStoreConfig,
   convertStringToBase64UrlString,
   stringToArrayBuffer,
   signPayload,
@@ -32,7 +32,7 @@ export async function signJwt(tokenPayload: TokenPayload): Promise<string> {
   const header = {
     alg: "RS384",
     typ: "JWT",
-    kid: IDBConfig.KEY_ID,
+    kid: IDBKeyStoreConfig.KEY_ID,
   };
 
   const nowInSeconds = Math.floor(Date.now() / 1000);

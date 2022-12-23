@@ -2,7 +2,7 @@ type Signature = ArrayBuffer;
 type Data = ArrayBuffer;
 
 // Configuration for IndexedDb for local key store
-export const IDBConfig = {
+export const IDBKeyStoreConfig = {
   DATABASE_NAME: "KeyDb",
   OBJECT_STORE_NAME: "KeyObjectStore",
   VERSION: 1,
@@ -88,12 +88,15 @@ function verify(
 function openDb() {
   const indexedDB = window.indexedDB;
   // Open (or create) the database
-  const open = indexedDB.open(IDBConfig.DATABASE_NAME, IDBConfig.VERSION);
+  const open = indexedDB.open(
+    IDBKeyStoreConfig.DATABASE_NAME,
+    IDBKeyStoreConfig.VERSION
+  );
 
   // Create the schema
   open.onupgradeneeded = function () {
     const db = open.result;
-    db.createObjectStore(IDBConfig.OBJECT_STORE_NAME, {
+    db.createObjectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME, {
       keyPath: "id",
     });
   };
@@ -113,10 +116,13 @@ export async function getPublicKey(): Promise<JsonWebKey> {
     open.onsuccess = function () {
       // Start a new transaction
       const db = open.result;
-      const tx = db.transaction(IDBConfig.OBJECT_STORE_NAME, "readwrite");
-      const store = tx.objectStore(IDBConfig.OBJECT_STORE_NAME);
+      const tx = db.transaction(
+        IDBKeyStoreConfig.OBJECT_STORE_NAME,
+        "readwrite"
+      );
+      const store = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
 
-      const getKeys = store.get(IDBConfig.KEY_ID) as IDBRequest<{
+      const getKeys = store.get(IDBKeyStoreConfig.KEY_ID) as IDBRequest<{
         id: number;
         keys: CryptoKeyPair;
       }>;
@@ -151,10 +157,13 @@ export async function signPayload(data: Data): Promise<Signature> {
     open.onsuccess = function () {
       // Start a new transaction
       const db = open.result;
-      const tx = db.transaction(IDBConfig.OBJECT_STORE_NAME, "readwrite");
-      const store = tx.objectStore(IDBConfig.OBJECT_STORE_NAME);
+      const tx = db.transaction(
+        IDBKeyStoreConfig.OBJECT_STORE_NAME,
+        "readwrite"
+      );
+      const store = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
 
-      const getKeys = store.get(IDBConfig.KEY_ID) as IDBRequest<{
+      const getKeys = store.get(IDBKeyStoreConfig.KEY_ID) as IDBRequest<{
         id: number;
         keys: CryptoKeyPair;
       }>;
@@ -192,8 +201,8 @@ async function getKeysFromDbOrCreate(
       );
     }
     // Create new transaction to store new keys, as the previous one is closed
-    const tx = db.transaction(IDBConfig.OBJECT_STORE_NAME, "readwrite");
-    const newTxStore = tx.objectStore(IDBConfig.OBJECT_STORE_NAME);
+    const tx = db.transaction(IDBKeyStoreConfig.OBJECT_STORE_NAME, "readwrite");
+    const newTxStore = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
     newTxStore.put({ id: 1, keys });
   }
   return keys;
@@ -215,10 +224,13 @@ export function verifyPayload(
     open.onsuccess = function () {
       // Start a new transaction
       const db = open.result;
-      const tx = db.transaction(IDBConfig.OBJECT_STORE_NAME, "readwrite");
-      const store = tx.objectStore(IDBConfig.OBJECT_STORE_NAME);
+      const tx = db.transaction(
+        IDBKeyStoreConfig.OBJECT_STORE_NAME,
+        "readwrite"
+      );
+      const store = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
 
-      const getKeys = store.get(IDBConfig.KEY_ID) as IDBRequest<{
+      const getKeys = store.get(IDBKeyStoreConfig.KEY_ID) as IDBRequest<{
         id: number;
         keys: CryptoKeyPair;
       }>;
