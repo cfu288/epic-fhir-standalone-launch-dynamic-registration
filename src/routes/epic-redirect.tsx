@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { AppRoutes } from "../app-routes";
 import {
   fetchAccessTokenUsingJWT,
   fetchAccessTokenWithCode,
   registerDynamicClient,
 } from "../services/epic";
+import {
+  storeDynamicRegistrationMetadata,
+  storeConnection,
+} from "../services/epic-connection-store";
 
 enum Status {
   Idle = 0,
@@ -19,6 +24,7 @@ export default function EpicRedirect() {
   const [status1, setStatus1] = useState<Status>(Status.Idle);
   const [status2, setStatus2] = useState<Status>(Status.Idle);
   const [status3, setStatus3] = useState<Status>(Status.Idle);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Handle the redirect callback from Epic
@@ -33,12 +39,22 @@ export default function EpicRedirect() {
         })
         .then(async (res) => {
           setStatus2(Status.Success);
+          console.log(res);
+          await storeDynamicRegistrationMetadata(res);
           return fetchAccessTokenUsingJWT(res);
         })
-        .then((res) => {
+        .then(async (res) => {
           setStatus3(Status.Success);
           console.log(res);
+          const nowInSeconds = Math.floor(Date.now() / 1000);
+          await storeConnection({
+            ...res,
+            expires_at: nowInSeconds + res.expires_in,
+          });
           setMsg("Successfully logged in!");
+          setTimeout(() => {
+            navigate(AppRoutes.Home);
+          }, 100);
         })
         .catch((e) => {
           setIsError(true);
