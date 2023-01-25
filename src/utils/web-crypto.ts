@@ -2,7 +2,7 @@ type Signature = ArrayBuffer;
 type Data = ArrayBuffer;
 
 // Configuration for IndexedDb for local key store
-export const IDBKeyStoreConfig = {
+export const IDBKeyConfig = {
   DATABASE_NAME: "KeyDb",
   OBJECT_STORE_NAME: "KeyObjectStore",
   VERSION: 1,
@@ -85,18 +85,19 @@ function verify(
   );
 }
 
+/**
+ * Opens indexedDb and handles initial setup
+ * @returns
+ */
 function openDb() {
   const indexedDB = window.indexedDB;
   // Open (or create) the database
-  const open = indexedDB.open(
-    IDBKeyStoreConfig.DATABASE_NAME,
-    IDBKeyStoreConfig.VERSION
-  );
+  const open = indexedDB.open(IDBKeyConfig.DATABASE_NAME, IDBKeyConfig.VERSION);
 
   // Create the schema
   open.onupgradeneeded = function () {
     const db = open.result;
-    db.createObjectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME, {
+    db.createObjectStore(IDBKeyConfig.OBJECT_STORE_NAME, {
       keyPath: "id",
     });
   };
@@ -116,13 +117,10 @@ export async function getPublicKey(): Promise<JsonWebKey> {
     open.onsuccess = function () {
       // Start a new transaction
       const db = open.result;
-      const tx = db.transaction(
-        IDBKeyStoreConfig.OBJECT_STORE_NAME,
-        "readwrite"
-      );
-      const store = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
+      const tx = db.transaction(IDBKeyConfig.OBJECT_STORE_NAME, "readwrite");
+      const store = tx.objectStore(IDBKeyConfig.OBJECT_STORE_NAME);
 
-      const getKeys = store.get(IDBKeyStoreConfig.KEY_ID) as IDBRequest<{
+      const getKeys = store.get(IDBKeyConfig.KEY_ID) as IDBRequest<{
         id: number;
         keys: CryptoKeyPair;
       }>;
@@ -157,13 +155,10 @@ export async function signPayload(data: Data): Promise<Signature> {
     open.onsuccess = function () {
       // Start a new transaction
       const db = open.result;
-      const tx = db.transaction(
-        IDBKeyStoreConfig.OBJECT_STORE_NAME,
-        "readwrite"
-      );
-      const store = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
+      const tx = db.transaction(IDBKeyConfig.OBJECT_STORE_NAME, "readwrite");
+      const store = tx.objectStore(IDBKeyConfig.OBJECT_STORE_NAME);
 
-      const getKeys = store.get(IDBKeyStoreConfig.KEY_ID) as IDBRequest<{
+      const getKeys = store.get(IDBKeyConfig.KEY_ID) as IDBRequest<{
         id: number;
         keys: CryptoKeyPair;
       }>;
@@ -201,12 +196,13 @@ async function getKeysFromDbOrCreate(
       );
     }
     // Create new transaction to store new keys, as the previous one is closed
-    const tx = db.transaction(IDBKeyStoreConfig.OBJECT_STORE_NAME, "readwrite");
-    const newTxStore = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
+    const tx = db.transaction(IDBKeyConfig.OBJECT_STORE_NAME, "readwrite");
+    const newTxStore = tx.objectStore(IDBKeyConfig.OBJECT_STORE_NAME);
     newTxStore.put({ id: 1, keys });
   }
   return keys;
 }
+
 /**
  * Verifies that a payload was signed with signature using a key pair that is stored in browser indexedDb.
  * @param data payload to verify
@@ -224,13 +220,10 @@ export function verifyPayload(
     open.onsuccess = function () {
       // Start a new transaction
       const db = open.result;
-      const tx = db.transaction(
-        IDBKeyStoreConfig.OBJECT_STORE_NAME,
-        "readwrite"
-      );
-      const store = tx.objectStore(IDBKeyStoreConfig.OBJECT_STORE_NAME);
+      const tx = db.transaction(IDBKeyConfig.OBJECT_STORE_NAME, "readwrite");
+      const store = tx.objectStore(IDBKeyConfig.OBJECT_STORE_NAME);
 
-      const getKeys = store.get(IDBKeyStoreConfig.KEY_ID) as IDBRequest<{
+      const getKeys = store.get(IDBKeyConfig.KEY_ID) as IDBRequest<{
         id: number;
         keys: CryptoKeyPair;
       }>;
@@ -249,61 +242,104 @@ export function verifyPayload(
 // Helpers
 
 /**
- * Convert a normal string to a Base64Url string - removes chars that are not allowed in a url
- * @param data
- * @returns
+ * Converts a string in base64 to base64url format
+ * @param base64String base64 string
+ * @returns base64Url string
  */
-export function convertStringToBase64UrlString(data: string): string {
-  return arrayBufferToBase64UrlString(stringToArrayBuffer(data));
-}
-
-/**
- * Converts an ArrayBuffer to a base64url string
- * @param arrayBuffer ArrayBuffer to convert
- * @returns base64 string
- */
-export function arrayBufferToBase64UrlString(arrayBuffer: ArrayBuffer): string {
-  const byteArray = new Uint8Array(arrayBuffer);
-  let byteString = "";
-  byteArray.forEach((byte) => {
-    byteString += String.fromCharCode(byte);
-  });
-  return btoa(byteString)
-    .replace(/=/g, "")
+export function base64StringToBase64UrlString(base64: string): string {
+  let base64Formatted = base64
     .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+
+  return base64Formatted;
+}
+
+export function base64StringToArrayBuffer(base64String: string): ArrayBuffer {
+  const binaryString = atob(base64String),
+    bytes = new Uint8Array(binaryString.length);
+
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+export function base64UrlStringToBase64String(base64UrlString: string): string {
+  let base64Formatted = base64UrlString.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = base64Formatted.length % 4;
+
+  if (padding === 1) {
+    throw new Error(
+      "InvalidLengthError: Input base64url string is the wrong length to determine padding"
+    );
+  }
+  if (padding === 2) {
+    base64Formatted += "==";
+  } else if (padding === 3) {
+    base64Formatted += "=";
+  }
+
+  return base64Formatted;
 }
 
 /**
- * Converts a string already in base64url format to an ArrayBuffer
- * @param base64UrlString base64 string
+ * Converts a string in base64url format to an ArrayBuffer
+ * @param base64String base64 string
  * @returns ArrayBuffer
  */
 export function base64UrlStringToArrayBuffer(
   base64UrlString: string
 ): ArrayBuffer {
-  let base64Formatted = base64UrlString
+  const base64String = base64UrlStringToBase64String(base64UrlString),
+    binaryString = atob(base64String),
+    bytes = new Uint8Array(binaryString.length);
+
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+/**
+ * Converts an ArrayBuffer to a base64 string
+ * @param arrayBuffer ArrayBuffer to convert
+ * @returns base64 string
+ */
+export function arrayBufferToBase64String(arrayBuffer: ArrayBuffer): string {
+  const byteArray = new Uint8Array(arrayBuffer);
+  let byteString = "";
+
+  byteArray.forEach((byte) => {
+    byteString += String.fromCharCode(byte);
+  });
+
+  return btoa(byteString);
+}
+
+export function arrayBufferToBase64UrlString(arrayBuffer: ArrayBuffer): string {
+  const byteArray = new Uint8Array(arrayBuffer);
+  let byteString = "";
+
+  byteArray.forEach((byte) => {
+    byteString += String.fromCharCode(byte);
+  });
+
+  return btoa(byteString)
     .replace(/-/g, "+")
     .replace(/_/g, "/")
     .replace(/\s/g, "");
+}
 
-  // Pad out with standard base64 required padding characters
-  const pad = base64Formatted.length % 4;
-  if (pad) {
-    if (pad === 1) {
-      throw new Error(
-        "InvalidLengthError: Input base64url string is the wrong length to determine padding"
-      );
-    }
-    base64Formatted += new Array(5 - pad).join("=");
-  }
-  const binary_string = atob(base64Formatted);
-  const len = binary_string.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i);
-  }
-  return bytes.buffer;
+/**
+ * Convert a normal string to a base64Url string - removes chars that are not allowed in a url
+ * @param data
+ * @returns
+ */
+export function textStringToBase64UrlString(data: string): string {
+  return base64StringToBase64UrlString(textStringToBase64String(data));
 }
 
 /**
@@ -311,7 +347,16 @@ export function base64UrlStringToArrayBuffer(
  * @param str string
  * @returns ArrayBuffer of base64 string
  */
-export function stringToArrayBuffer(str: string): ArrayBuffer {
-  const base64Encoded = btoa(str);
-  return base64UrlStringToArrayBuffer(base64Encoded);
+export function textStringToBase64UrlArrayBuffer(str: string): ArrayBuffer {
+  return base64UrlStringToArrayBuffer(
+    base64StringToBase64UrlString(textStringToBase64String(str))
+  );
+}
+
+export function textStringToBase64ArrayBuffer(str: string): ArrayBuffer {
+  return base64StringToArrayBuffer(textStringToBase64String(str));
+}
+
+export function textStringToBase64String(str: string): string {
+  return btoa(str);
 }

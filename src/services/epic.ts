@@ -1,5 +1,5 @@
 import { AppRoutes } from "../app-routes";
-import { getPublicKey, IDBKeyStoreConfig } from "../utils/web-crypto";
+import { getPublicKey, IDBKeyConfig } from "../utils/web-crypto";
 import { v4 as uuidv4 } from "uuid";
 import { signJwt } from "../utils/jwt-tools";
 
@@ -67,7 +67,7 @@ export async function registerDynamicClient(
           e: validJWKS.e,
           kty: validJWKS.kty,
           n: validJWKS.n,
-          kid: `${IDBKeyStoreConfig.KEY_ID}`,
+          kid: `${IDBKeyConfig.KEY_ID}`,
         },
       ],
     },

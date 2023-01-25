@@ -1,11 +1,12 @@
 import {
-  IDBKeyStoreConfig,
-  convertStringToBase64UrlString,
-  stringToArrayBuffer,
+  IDBKeyConfig,
+  textStringToBase64UrlString,
+  textStringToBase64UrlArrayBuffer,
   signPayload,
-  arrayBufferToBase64UrlString,
-  base64UrlStringToArrayBuffer,
+  arrayBufferToBase64String,
   verifyPayload,
+  base64StringToBase64UrlString,
+  base64UrlStringToArrayBuffer,
 } from "./web-crypto";
 
 export interface JsonWebKeyWKid extends JsonWebKey {
@@ -32,7 +33,7 @@ export async function signJwt(tokenPayload: TokenPayload): Promise<string> {
   const header = {
     alg: "RS384",
     typ: "JWT",
-    kid: IDBKeyStoreConfig.KEY_ID,
+    kid: IDBKeyConfig.KEY_ID,
   };
 
   const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -48,25 +49,31 @@ export async function signJwt(tokenPayload: TokenPayload): Promise<string> {
   const stringifiedHeader = JSON.stringify(header);
   const stringifiedPayload = JSON.stringify(payload);
 
-  const headerBase64 = convertStringToBase64UrlString(stringifiedHeader);
-  const payloadBase64 = convertStringToBase64UrlString(stringifiedPayload);
+  const headerBase64 = textStringToBase64UrlString(stringifiedHeader);
+  const payloadBase64 = textStringToBase64UrlString(stringifiedPayload);
 
   const headerAndPayload = `${headerBase64}.${payloadBase64}`;
 
-  const messageAsArrayBuffer = stringToArrayBuffer(headerAndPayload);
+  const messageAsArrayBuffer =
+    textStringToBase64UrlArrayBuffer(headerAndPayload);
 
   const signature = await signPayload(messageAsArrayBuffer);
-  const base64Signature = arrayBufferToBase64UrlString(signature);
+  const base64Signature = base64StringToBase64UrlString(
+    arrayBufferToBase64String(signature)
+  );
 
   return `${headerAndPayload}.${base64Signature}`;
 }
 
 export async function verifyJwt(jwt: string) {
   const [header, payload, signature] = jwt.split(".");
-  const headerAndPayloadAsUint8Array = stringToArrayBuffer(
+  const headerAndPayloadAsUint8Array = textStringToBase64UrlArrayBuffer(
     `${header}.${payload}`
   );
-  const signatureAsUint8Array = base64UrlStringToArrayBuffer(signature);
+  const signatureAsUint8Array = base64UrlStringToArrayBuffer(
+    base64StringToBase64UrlString(signature)
+  );
+
   return await verifyPayload(
     headerAndPayloadAsUint8Array,
     signatureAsUint8Array
