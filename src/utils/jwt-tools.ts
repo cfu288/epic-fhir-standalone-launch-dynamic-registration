@@ -54,8 +54,9 @@ export async function signJwt(tokenPayload: TokenPayload): Promise<string> {
 
   const headerAndPayload = `${headerBase64}.${payloadBase64}`;
 
-  const messageAsArrayBuffer =
-    textStringToBase64UrlArrayBuffer(headerAndPayload);
+  const messageAsArrayBuffer = textStringToBase64UrlArrayBuffer(
+    headerAndPayload
+  );
 
   const signature = await signPayload(messageAsArrayBuffer);
   const base64Signature = base64StringToBase64UrlString(

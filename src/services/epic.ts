@@ -2,6 +2,7 @@ import { AppRoutes } from "../app-routes";
 import { getPublicKey, IDBKeyConfig } from "../utils/web-crypto";
 import { v4 as uuidv4 } from "uuid";
 import { signJwt } from "../utils/jwt-tools";
+import { Patient, Bundle, BundleEntry, FhirResource } from "fhir/r2";
 
 export const baseUrl = "https://fhir.epic.com/interconnect-fhir-oauth";
 
@@ -117,6 +118,29 @@ export async function fetchAccessTokenUsingJWT(
     throw new Error(`Error getting access token with JWT: ${text}`);
   }
   return await tokenRes.json();
+}
+
+export async function getFHIRResource<T extends FhirResource>(
+  accessToken: string,
+  fhirResourceUrl: string,
+  params?: Record<string, string>
+): Promise<BundleEntry<T>[]> {
+  const url = `${getDSTU2Url()}/${fhirResourceUrl}?${new URLSearchParams(
+    params
+  )}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: `application/fhir+json`,
+    },
+  })
+    .then((res) => res.json())
+    .then((res: Bundle) => res);
+
+  if (res.entry) {
+    return res.entry as BundleEntry<T>[];
+  }
+  return [];
 }
 
 export interface EpicAuthResponse {
