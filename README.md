@@ -31,3 +31,7 @@ You'll need a `.env` with the following:
 VITE_EPIC_CLIENT_ID: <sandbox_client_id>
 VITE_PUBLIC_URL: "http://localhost:5173"
 ```
+
+## Setting up an Epic App Registration
+
+This example uses the same registration used by [Mere Medical](www.meremedical.co). If you decide to use this for your own app, you'll need to set up your own app registration with Epic. I've written a quick tutorial on how to do this [here](https://meremedical.co/docs/getting-started/epic-setup).

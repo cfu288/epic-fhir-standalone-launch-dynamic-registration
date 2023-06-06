@@ -47,8 +47,15 @@ export default function App() {
         <a href={getLoginUrl()}>
           <button type="button">Login to MyChart</button>
         </a>
-        <br />
-        <br />
+        <section>
+          <h2>Sandbox credentials:</h2>
+          <p>
+            username: <code>fhirderrick</code>
+          </p>
+          <p>
+            passowrd: <code>epicepic1</code>
+          </p>
+        </section>
         {dr ? (
           <article>
             <h2>Dynamic Client Registration Data</h2>
