@@ -123,6 +123,11 @@ export async function storeConnection(
   });
 }
 
+/**
+ * Stores dynamic registration metadata in indexedDb
+ * @param metadata
+ * @returns
+ */
 export async function storeDynamicRegistrationMetadata(
   metadata: EpicDynamicRegistrationResponse
 ): Promise<IDBRequest<IDBValidKey>> {

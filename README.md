@@ -28,8 +28,8 @@ npm run dev
 You'll need a `.env` with the following:
 
 ```
-VITE_EPIC_CLIENT_ID: <sandbox_client_id>
-VITE_PUBLIC_URL: "http://localhost:5173"
+VITE_EPIC_CLIENT_ID="<sandbox_client_id>"
+VITE_PUBLIC_URL="http://localhost:5173"
 ```
 
 ## Setting up an Epic App Registration
