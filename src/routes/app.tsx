@@ -18,9 +18,8 @@ export default function App() {
   const [con, setCon] = useState<
     (EpicAuthResponse & { expires_at: number }) | undefined
   >();
-  const [patientData, setPatientData] = useState<
-    BundleEntry<Condition | OperationOutcome>[]
-  >();
+  const [patientData, setPatientData] =
+    useState<BundleEntry<Condition | OperationOutcome>[]>();
   const [expiresAt, setExpiresAt] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -58,7 +57,7 @@ export default function App() {
             username: <code>fhirderrick</code>
           </p>
           <p>
-            passowrd: <code>epicepic1</code>
+            password: <code>epicepic1</code>
           </p>
         </section>
         {dr ? (

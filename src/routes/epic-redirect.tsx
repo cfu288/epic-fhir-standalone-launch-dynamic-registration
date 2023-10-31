@@ -60,11 +60,11 @@ export default function EpicRedirect() {
               ...res,
               expires_at: nowInSeconds + res.expires_in,
             });
-            setMsg("Successfully logged in! Redirecting in 1 second...");
+            setMsg("Successfully logged in! Redirecting...");
             setStatus3(Status.Success);
             setTimeout(() => {
               navigate(AppRoutes.Home);
-            }, 1000);
+            }, 100);
           })
           .catch((e) => {
             setIsError(true);
